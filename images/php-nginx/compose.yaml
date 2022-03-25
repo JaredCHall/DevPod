@@ -1,0 +1,24 @@
+services:
+  VAR_SERVICE_NAME:
+    image: VAR_IMAGE_NAME:1.0
+    build:
+      context: ./container/images/php-nginx
+      args:
+        PHP_VERSION: ARG_PHP_VERSION
+        COMPOSER: ARG_COMPOSER
+    container_name: VAR_SERVICE_NAME
+    environment:
+      TZ: VAR_TIMEZONE
+    networks:
+      - VAR_NETWORK_NAME
+    ports:
+      - 127.0.0.1:8080:80
+    volumes:
+      # expose www files to host
+      - ./:/var/www/:Z
+      # expose configuration to host
+      - ./container/etc/nginx:/container/etc/nginx:Z
+      - ./container/etc/php:/container/etc/php:Z
+      # expose default configuration to host (for debugging builds)
+      #- ./container/etc/.defaults/nginx:/container/etc/nginx.defaults:Z
+      #- ./container/etc/.defaults/php:/container/etc/php.defaults:Z
