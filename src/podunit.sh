@@ -67,8 +67,15 @@ podunit_init() {
     test ! -z ${podunit_strict} && set -euo pipefail
 
     # prepare containers
-    podunit_msg "Testing build ${podunit_image_name}:${podunit_image_tag} ..."
-    container_up
+    podunit_msg "---- ${podunit_image_name}:${podunit_image_tag} ----"
+    podunit_msg ""
+    container_up > /dev/null
+
+    # Display container OS
+    local os
+    os=$(container_exec cat /etc/os-release | grep PRETTY_NAME | sed 's|PRETTY_NAME=||' | tr -d '"')
+    podunit_msg "Container OS: ${os}"
+
 }
 
 podunit_clean() {

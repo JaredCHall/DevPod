@@ -6,7 +6,7 @@ DevPod assists with setting up container images for developing web applications.
 
 Why use a DevPod? You certainly could just download a MariaDB container image from an image repository like docker.io. Unfortunately, those images obscure how they are built. Many of them do not have a publicly available Dockerfile for you to inspect. Unless you build an image yourself, you don't really know what is in it. Premade images also prevent you from customizing the build.
 
-Use DevPods if:
+Use DevPods When:
 - You have the unshakable need to understand exactly how everything works.
 - You are learning about containers and how they are built.
 - You are paranoid about downloading container images from popular repositories.
@@ -16,6 +16,7 @@ Use DevPods if:
 
 - Php-Nginx: front-end web server
 - MariaDB: database server
+- Mysql: database server
 
 ## Supported Distributions
 
@@ -47,6 +48,3 @@ Push to Container Registry
 podman build [image_name]
 podman push [image_name] [registry]
 ```
-
-
-Or stitch together the 

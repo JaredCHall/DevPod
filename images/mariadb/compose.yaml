@@ -2,22 +2,22 @@ services:
   VAR_SERVICE_NAME:
     image: VAR_IMAGE_NAME:1.0
     build:
-      context: ./container/images/mariadb
+      context: ./images/mariadb
       args:
-        MARIADB_VERSION: ARG_MARIADB_VERSION
-        MARIADB_USER: ARG_MARIADB_USER
-        MARIADB_PASS: ARG_MARIADB_PASS
+        MARIADB_VERSION: ${PODMAN_MARIADB_VERSION}
+        MARIADB_USER: "${PODMAN_MARIADB_USER}"
+        MARIADB_PASS: "${PODMAN_MARIADB_PASS}"
     container_name: VAR_SERVICE_NAME
     environment:
-      TZ: VAR_TIMEZONE
+      TZ: ${PODMAN_TIMEZONE}
     networks:
       - VAR_NETWORK_NAME
     ports:
       - 127.0.0.1:3306:3306
     volumes:
       # persistent named volume
-      - dbdata:/var/lib/mysql
+      - VAR_SERVICE_NAME-dbdata:/var/lib/mysql
       # expose mysql configuration to host
-      - ./container/etc/mysql:/container/etc/mysql:Z
-      # expose mysql default configuration to host (for debugging builds)
-      #- ./container/etc/.defaults/mysql:/container/etc/mysql.defaults:Z
+      #- ./etc/mysql:/container/etc/mysql:Z
+      # expose mysql default configuration to host
+      #- ./etc/.defaults/mysql:/container/etc/mysql.defaults:Z

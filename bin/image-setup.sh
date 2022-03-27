@@ -27,7 +27,7 @@ cmdopt_image_os=''
 
 main() {
 
-    image_dir=$(realpath ../images || trigger_error "Could not find image directory")
+    src_image_dir=$(realpath ../images || trigger_error "Could not find image directory")
 
     parse_options "$@"
 
@@ -77,11 +77,9 @@ main() {
 
 install_build_context() {
 
-
-
     echo "Installing build context"
 
-    image_dir="${image_dir}/${image_type}"
+    image_dir="${src_image_dir}/${image_type}"
     src_dir="${image_dir}/os/${image_os}"
 
     install_dir="${build_dir}/images/${image_type}"
@@ -96,9 +94,9 @@ install_build_context() {
     cp -r "${src_dir}/"* "${install_dir}"
 
     # Create Dockerfile
-    cat ${src_dir}/Dockerfile >"${install_dir}/Dockerfile"
+    cat ${src_dir}/Dockerfile > "${install_dir}/Dockerfile"
     if [ -f "${image_dir}/stub/Dockerfile.stub" ]; then
-        cat "${image_dir}/stub/Dockerfile.stub" >>"${install_dir}/Dockerfile"
+        cat "${image_dir}/stub/Dockerfile.stub" >> "${install_dir}/Dockerfile"
     fi
 
     # Copy test src
@@ -109,10 +107,23 @@ install_build_context() {
     # Copy image test unit
     cp -f "../tests/${image_type}-test.sh" "${build_dir}/tests/"
 
+    create_env_file
     create_compose_example
 
-    # Copy docker-compose.yaml example
+}
 
+create_env_file()
+{
+    local new_file="${build_dir}/.${image_type}.env"
+    # Create .env file
+    rm -f "${new_file}"
+    touch "${new_file}"
+    if [ -f "${image_dir}/stub/.env" ]; then
+        cat "${image_dir}/stub/.env" >> "${new_file}"
+    fi
+    if [ -f "${src_dir}/.env" ]; then
+        cat "${src_dir}/.env" >> "${new_file}"
+    fi
 }
 
 create_compose_example() {
@@ -130,8 +141,6 @@ create_compose_example() {
 
     replace=()
     replace+=("s/VAR_IMAGE_NAME/${image_type}/g")
-    local timezone="America/New_York # UTC, America/New_York, America/Chicago, America/Denver, America/Los_Angeles"
-    replace+=("s|VAR_TIMEZONE|${timezone}|")
 
     case "${image_type}" in
         php-nginx) service="web" ;;
@@ -139,16 +148,6 @@ create_compose_example() {
     esac
     replace+=("s/VAR_SERVICE_NAME/${dirname}-${service}/g")
     replace+=("s/VAR_NETWORK_NAME/${dirname}-net/g")
-
-    local args_file arg_name arg_val
-    args_file="${image_dir}/build-args.sh"
-    if [[ -f "${args_file}" ]]; then
-        source "${args_file}" "${image_os}"
-        for arg_name in "${BUILD_ARGS[@]}"; do
-            arg_val=$(echo "${!arg_name}" | tr -d "/'") # remove bad characters
-            replace+=("s/ARG_${arg_name}/${arg_val}/")
-        done
-    fi
 
     local cmd
     cmd="cat ${compose_file}"
@@ -164,15 +163,15 @@ find_subdirs() {
 }
 
 set_enum_image_types() {
-    enum_image_types=$(find_subdirs "${image_dir}")
-    test -z "${enum_image_types}" && trigger_error "No builds found in ${image_dir}"
+    enum_image_types=$(find_subdirs "${src_image_dir}")
+    test -z "${enum_image_types}" && trigger_error "No builds found in ${src_image_dir}"
     IFS=" " read -r -a enum_image_types <<<"${enum_image_types}" #convert to array
 }
 
 set_enum_os_types() {
     local os_dir
     test -z "$image_type" && trigger_error "cannot set os_type before setting image_type"
-    os_dir="${image_dir}/${image_type}/os"
+    os_dir="${src_image_dir}/${image_type}/os"
     test -d "$os_dir" || trigger_error "directory not found ${os_dir}"
     enum_os_types=$(find_subdirs "${os_dir}")
     test -z "${enum_os_types}" && trigger_error "no supported image-os found in ${os_dir}"
