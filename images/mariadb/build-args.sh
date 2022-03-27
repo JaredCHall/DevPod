@@ -14,4 +14,7 @@ case "${1}" in
     debian)
         MARIADB_VERSION='10.7.3  # full version number -installs from mariadb.com official repository'
     ;;
+    rocky)
+        MARIADB_VERSION='10.6  # minor version number -installs from mariadb.com official repository'
+    ;;
 esac

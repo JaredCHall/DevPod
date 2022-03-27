@@ -62,7 +62,6 @@ run_tests()
   sleep 1
 
   r=$( echo "show databases;" | $mysql_cmd | grep persistence_test)
-  echo "show databases;" | $mysql_cmd
   podunit_assert "database persists on restart" test -n "$r"
 
   # Test mysql conf exposed to host

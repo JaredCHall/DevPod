@@ -228,25 +228,24 @@ get_port_arg_str() {
 }
 
 print_debug_info() {
-    podunit_msg "
-  ---- USEFUL DEBUG COMMANDS ---
+    podunit_msg "---- USEFUL DEBUG COMMANDS ---
 
-  # stop / remove container
-  podman stop ${podunit_image_name}
-  podman rm -v ${podunit_image_name}
+# stop / remove container
+podman stop ${podunit_image_name}
+podman rm -v ${podunit_image_name}
 
-  # remove image
-  podman image rm ${podunit_image_name}:${podunit_image_tag}
+# remove image
+podman image rm ${podunit_image_name}:${podunit_image_tag}
 
-  # build image
-  podman build -t ${podunit_image_name}:${podunit_image_tag} $(get_build_args_str) ${podunit_build_context}
+# build image
+podman build -t ${podunit_image_name}:${podunit_image_tag} $(get_build_args_str) ${podunit_build_context}
 
-  # create container
-  podman create --name ${podunit_image_name} $(get_port_arg_str) $(get_volume_args_str) ${podunit_image_name}:${podunit_image_tag}
+# create container
+podman create --name ${podunit_image_name} $(get_port_arg_str) $(get_volume_args_str) ${podunit_image_name}:${podunit_image_tag}
 
-  # start container
-  podman start ${podunit_image_name}
-  "
+# start container
+podman start ${podunit_image_name}
+"
 }
 
 image_build() {

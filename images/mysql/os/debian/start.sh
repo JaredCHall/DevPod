@@ -4,9 +4,11 @@ set -euo pipefail
 main()
 {
   expose_conf
+
   # Trap to ensure we get a safe shutdown
-  trap 'mariadb-admin shutdown; exit 0' HUP INT QUIT TERM
-  mariadbd --user=mysql & wait "$!"
+  trap 'mysqladmin shutdown; exit 0' HUP INT QUIT TERM
+  mysqld & wait "$!"
+  #sleep infinity & wait "$!"
 }
 
 expose_conf()

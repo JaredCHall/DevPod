@@ -12,14 +12,15 @@ mkdir -p /var/lib/mysql && chown -R mysql:mysql /var/lib/mysql
 mkdir -p /var/log/mysql && chown -R mysql:mysql /var/log/mysql
 mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld
 
-
 # backup original conf files
 defaults_dir=/container/defaults/mysql
 mkdir -p $defaults_dir
-cp -r --no-dereference /etc/mysql/* $defaults_dir
+cp /etc/my.cnf $defaults_dir
+cp -r --no-dereference /etc/my.cnf.d $defaults_dir
 
 # Remove default configurations
-rm -r /etc/mysql
+rm /etc/my.cnf
+rm -r /etc/my.cnf.d
 
 # Copy build conf file
 mkdir -p /etc/mysql
