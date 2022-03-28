@@ -96,7 +96,8 @@ mkdir /etc/php/php.d
             --enable-mbstring \
             --with-openssl \
             --with-pdo-mysql=mysqlnd \
-            --with-zlib
+            --with-zlib \
+            --enable-opcache
 
 cores=$(nproc)
 make -j${cores}
