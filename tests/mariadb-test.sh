@@ -29,9 +29,6 @@ main() {
 
     # define exposed ports
     podunit_init "$@"
-
-
-
     run_tests
     podunit_result
 
@@ -76,6 +73,8 @@ run_tests() {
     # Test database persistence
     echo "CREATE DATABASE persistence_test;" | $mysql_cmd
 
+    # rebuild containers, but disable no-cache
+    podunit_nocache=""
     container_down > /dev/null
     container_up > /dev/null
 

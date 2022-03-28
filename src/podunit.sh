@@ -27,6 +27,7 @@ podunit_quiet=''      # does not print out
 podunit_stream=''     # pipe test output to stdout and exit on first test failure
 podunit_strict=''     # use 'set -euxo pipefail' for all tests
 podunit_debug=''      # print debug info
+podunit_build=''      # build image, but do not run tests
 
 # initializes "class"; performs validations and creates files
 podunit_init() {
@@ -56,8 +57,15 @@ podunit_init() {
         fi
     done
 
-    # print debug info, if necessary
+    # print debug info, if --debug passed
     test ! -z ${podunit_debug} && print_debug_info && exit 0
+
+    # build image and exit, if --build passed
+    if test ! -z ${podunit_build}; then
+        test ! -z ${podunit_nocache} && image_remove;
+        image_build 1 && echo "Build completed successfully"
+        exit 0
+    fi
 
     # Ensure temporary files / containers are cleaned up on exit
     trap 'podunit_clean' EXIT
@@ -74,7 +82,7 @@ podunit_init() {
     # Display container OS
     local os
     os=$(container_exec cat /etc/os-release | grep PRETTY_NAME | sed 's|PRETTY_NAME=||' | tr -d '"')
-    podunit_msg "Container OS: ${os}"
+    podunit_msg "OS distrubtion: ${os}"
 
 }
 
@@ -145,10 +153,11 @@ podunit_result() {
         echo "Passed: ${podunit_test_pass}"
         echo "Failed: ${podunit_test_fail}"
         echo "Skipped: ${podunit_test_skip}"
+        echo "----------"
         if test ${podunit_test_fail} -ge 1; then
-            echo "TEST FAILED"
+            echo -e "\e[31mFAILED\e[0m"
         else
-            echo "TEST SUCCESS"
+            echo -e "\e[32mSUCCESS\e[0m"
         fi
     else
         if test 0 -eq ${podunit_test_fail}; then
@@ -161,7 +170,7 @@ podunit_result() {
 
 podunit_parse_options() {
     local tmp
-    tmp=$(getopt -o "hnqsx" --long "help,no-cache,quiet,stream,strict,debug,arg:" -n "nginx-php-test.sh" -- "$@")
+    tmp=$(getopt -o "hnqsx" --long "help,no-cache,quiet,stream,strict,debug,arg:,build" -n "nginx-php-test.sh" -- "$@")
     eval set -- "$tmp"
 
     while true; do
@@ -172,6 +181,10 @@ podunit_parse_options() {
             ;;
         --debug)
             podunit_debug="1"
+            shift
+            ;;
+        --build)
+            podunit_build="1"
             shift
             ;;
         -n | --no-cache)
@@ -204,6 +217,7 @@ Options:
     -x, --strict      Use 'set -euxo pipefail' for all tests
     --arg             A build arg passed to the Dockerfile (ex. PHP_VERSION=php8)
                       You can pass this option multiple times, just like with the podman/docker command
+    --build           Build image, but do not run tests
     --debug           Print podman commands useful for debugging builds
     -h, --help        Display this help
 "
@@ -255,10 +269,18 @@ podman start ${podunit_image_name}
 "
 }
 
+# @Param loud - show full from podman build
 image_build() {
+    local loud
+    loud="${1-}"
     podunit_msg "building image..."
     local build_args="$(get_build_args_str)"
-    podman build -q -t ${podunit_image_name}:${podunit_image_tag} ${build_args} ${podunit_build_context} >/dev/null && return
+    build_args="-t ${podunit_image_name}:${podunit_image_tag} ${build_args} ${podunit_build_context}"
+    if [[ -z "${loud}" ]]; then
+        podman build -q ${build_args} >/dev/null && return
+    else
+        podman build ${build_args} && return
+    fi
     false
 }
 
@@ -280,7 +302,7 @@ container_up() {
     local err_file="${podunit_tmp_dir}/build.err"
 
     if test ! -z ${podunit_nocache}; then
-        image_remove 1>&2 /dev/null || true
+        image_remove &> /dev/null || true
     fi
 
     image_build >/dev/null 2>"${err_file}"

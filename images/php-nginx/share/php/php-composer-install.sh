@@ -20,4 +20,6 @@ php composer-setup.php --quiet
 mv composer.phar /usr/local/bin/composer
 RESULT=$?
 rm composer-setup.php
+# Add line to .bashrc to prevent composer complaining when run as root
+echo "export COMPOSER_ALLOW_SUPERUSER=1" >> /root/.bashrc
 exit $RESULT
