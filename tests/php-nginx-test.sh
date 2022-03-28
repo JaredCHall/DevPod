@@ -36,13 +36,16 @@ main() {
 run_tests() {
 
     # Display installed php / composer versions
+    nginx_version=$(container_exec nginx -v 2>&1 | grep -oE "nginx[/][0-9]+[.][0-9]+[.][0-9]+"  | sed 's|nginx/||')
     php_version=$(container_exec php-fpm --version | grep -oE "^PHP [0-9]+[.][0-9]+[.][0-9]+" | sed 's|PHP ||')
     composer_version=$(podman exec --env COMPOSER_ALLOW_SUPERUSER=1 ${podunit_image_name} composer --version | grep -oE "^Composer version [0-9]+[.][0-9]+[.][0-9]+" | sed 's|Composer version ||')
+    php_extensions=$(podman exec ${podunit_image_name} php -r "echo implode(' ',get_loaded_extensions());")
+    podunit_msg "Nginx version: ${nginx_version}"
     podunit_msg "PHP version: ${php_version}"
     podunit_msg "Composer version: ${composer_version}"
+    podunit_msg "PHP extensions: ${php_extensions}"
 
     # Test installed php version
-    # Test installed mariadb version
     case ${PODMAN_PHPNGINX_OS} in
         alpine)
             podunit_skip "PHP version"
