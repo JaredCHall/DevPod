@@ -1,15 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
-trigger_error() {
-  echo "ERROR: $1" >&2; exit 1;
-}
+trigger_error() { echo "ERROR: $1" >&2; exit 1; }
 
 
 
 ### VALIDATE VERSION ###
 version="${1-}"
 test -n "$version" || trigger_error "ERROR: build-arg PHP_VERSION not provided"
+grep -qE "^[0-9]+[.][0-9]+[.][0-9+]$" || trigger_error "Invalid PHP version '${version}'. Must be a full version number such as 8.0.17"
 
 # configure dnf to use powertools and epel repos
 dnf install -y dnf-plugins-core

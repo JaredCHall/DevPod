@@ -6,8 +6,8 @@ RUN dnf upgrade -y
 # Install tzdata to allow changing container timezone
 RUN dnf install -y tzdata
 
-ARG PHP_VERSION=latest
-ARG PHP_INSTALL_TYPE=repo
+ARG NGINX_INSTALL_TYPE=source
+ARG NGINX_VERSION=1.20.2
 
-# Full version number
+ARG PHP_INSTALL_TYPE=source
 ARG PHP_VERSION=8.1.4
