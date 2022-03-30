@@ -3,9 +3,15 @@ set -euo pipefail
 
 pushd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null
 source ./src/podunit.sh
-source ../.php-nginx.env
 
 main() {
+
+    require_env_file ../.php-nginx.env PODMAN_PHPNGINX_OS \
+                                       PODMAN_NGINX_INSTALL_TYPE \
+                                       PODMAN_NGINX_VERSION \
+                                       PODMAN_PHP_INSTALL_TYPE \
+                                       PODMAN_PHP_VERSION \
+                                       PODMAN_PHP_COMPOSER
 
     check_dependencies "podman" "wget"
 
@@ -16,8 +22,11 @@ main() {
     podunit_container_port="80"
 
     # add build args
+    podunit_build_args+=("NGINX_INSTALL_TYPE=${PODMAN_NGINX_INSTALL_TYPE}")
+    podunit_build_args+=("NGINX_VERSION=${PODMAN_NGINX_VERSION}")
+    podunit_build_args+=("PHP_INSTALL_TYPE=${PODMAN_PHP_INSTALL_TYPE}")
     podunit_build_args+=("PHP_VERSION=${PODMAN_PHP_VERSION}")
-    podunit_build_args+=("COMPOSER=1")
+    podunit_build_args+=("PHP_COMPOSER=${PODMAN_PHP_COMPOSER}")
 
     # set volumes
     podunit_volumes+=("${podunit_tmp_dir}/project:/var/www/public:Z")
@@ -38,7 +47,7 @@ run_tests() {
     # Display installed php / composer versions
     nginx_version=$(container_exec nginx -v 2>&1 | grep -oE "nginx[/][0-9]+[.][0-9]+[.][0-9]+"  | sed 's|nginx/||')
     php_version=$(container_exec php-fpm --version | grep -oE "^PHP [0-9]+[.][0-9]+[.][0-9]+" | sed 's|PHP ||')
-    composer_version=$(podman exec --env COMPOSER_ALLOW_SUPERUSER=1 ${podunit_image_name} composer --version | grep -oE "^Composer version [0-9]+[.][0-9]+[.][0-9]+" | sed 's|Composer version ||')
+    composer_version=$(podman exec --env COMPOSER_ALLOW_SUPERUSER=1 ${podunit_image_name} composer --version | grep -oE "^Composer [0-9]+[.][0-9]+[.][0-9]+" | sed 's|Composer ||')
     php_extensions=$(podman exec ${podunit_image_name} php -r "echo implode(' ',get_loaded_extensions());")
     podunit_msg "Nginx version: ${nginx_version}"
     podunit_msg "PHP version: ${php_version}"
@@ -75,7 +84,11 @@ run_tests() {
     podunit_assert "nginx serves php" test "${r}" = 'ok'
 
     # Test php composer installed
-    podunit_assert "php composer installed" test -n "${composer_version}"
+    if [[ "1" = "${PODMAN_COMPOSE}" ]]; then
+        podunit_assert "php composer installed" test -n "${composer_version}"
+    else
+        podunit_skip "php composer installed"
+    fi
 
     # Test php opcache enabled
     echo "<?php echo extension_loaded('Zend OPcache'); ?>" >${test_dir}/index.php

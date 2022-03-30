@@ -1,6 +1,34 @@
 #!/bin/bash
 set -euo pipefail
 
+BASHUTILS_SRC_FILES=()
+
+# $1 - path to src file
+require_src_file()
+{
+    local file
+    file="${1-}"
+    test -n "${file}" || trigger_error "Must provide file as arg \$1"
+    file=$(realpath "${file}")
+    in_array "$file" "${BASHUTILS_SRC_FILES[@]}" && trigger_warning "${file} already sourced" && return
+    test -f "${file}" || trigger_error "No file exists at ${file}"
+    # shellcheck source=/dev/null
+    source "${file}"
+    BASHUTILS_SRC_FILES+=("${file}")
+}
+
+# $1 - path to env file
+# $2... - required env vars
+require_env_file()
+{
+    local file="${1-}"
+    require_src_file "${file}"
+    shift
+    for e; do
+        test -v "${e}" || trigger_error "${file} must define ${e}"
+    done
+}
+
 # $1 command name
 cmd_exists()
 {
@@ -17,7 +45,7 @@ check_dependencies()
 }
 
 # $1 - needle
-# $2 - haystack
+# $2... - haystack
 in_array()
 {
   local e match="$1"
@@ -65,9 +93,5 @@ prompt_choice()
 	echo "$sel"
 }
 
-#$1 - error message
-trigger_error()
-{
-  echo "ERROR: $1" >&2
-  exit 1
-}
+trigger_error() { echo "[ERROR] $1" >&2; exit 1; }
+trigger_warning() { echo "[WARNING] $1" >&2; }

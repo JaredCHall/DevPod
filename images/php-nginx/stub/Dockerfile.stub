@@ -5,14 +5,10 @@ WORKDIR /tmp/build-image/
 
 # Install nginx
 COPY nginx/nginx-install.sh ./
-COPY nginx/nginx-install-from-repo.sh ./
-COPY nginx/nginx-compile-from-source.sh ./
 RUN ./nginx-install.sh "${NGINX_INSTALL_TYPE}" "${NGINX_VERSION}"
 
 # Install php
 COPY php/php-install.sh ./
-COPY php/php-install-from-repo.sh ./
-COPY php/php-compile-from-source.sh ./
 RUN ./php-install.sh "${PHP_INSTALL_TYPE}" "${PHP_VERSION}"
 
 # Configure php
@@ -22,13 +18,14 @@ RUN ./php-configure.sh "${PHP_INSTALL_TYPE}" "${PHP_VERSION}"
 
 # Install composer
 ARG COMPOSER=1
+ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY php/php-composer-install.sh ./
-RUN ./php-composer-install.sh "${COMPOSER}"
+RUN ./php-composer-install.sh ${COMPOSER}
 
 # Configure nginx
 COPY nginx/nginx-configure.sh ./
 ADD nginx/etc nginx-etc
-RUN ./nginx-configure.sh
+RUN ./nginx-configure.sh "${NGINX_INSTALL_TYPE}" "${NGINX_VERSION}"
 
 # Clean up
 WORKDIR /root/

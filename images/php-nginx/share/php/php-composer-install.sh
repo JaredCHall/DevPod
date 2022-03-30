@@ -1,9 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+trigger_error() { echo "[ERROR] $1" >&2; exit 1; }
+trigger_warning() { echo "[WARNING] $1" >&2; }
+
 # Exit 0, if image not configured to install composer
 [[ '1' != "${1-}" ]] && exit 0
-
 #https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
 EXPECTED_CHECKSUM="$(php -r 'copy("https://composer.github.io/installer.sig", "php://stdout");')"
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -16,10 +18,10 @@ then
     exit 1
 fi
 
-php composer-setup.php --quiet
+php composer-setup.php || trigger_error "composer installation failed"
+
 mv composer.phar /usr/local/bin/composer
-RESULT=$?
 rm composer-setup.php
-# Add line to .bashrc to prevent composer complaining when run as root
-echo "export COMPOSER_ALLOW_SUPERUSER=1" >> /root/.bashrc
-exit $RESULT
+
+# sanity check
+composer --version | grep -qE "^Composer [0-9]+[.][0-9]+[.][0-9]+" || trigger_error "sanity check! composer installation failed"
