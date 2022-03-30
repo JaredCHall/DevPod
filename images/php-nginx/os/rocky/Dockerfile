@@ -9,3 +9,5 @@ RUN dnf install -y tzdata
 ARG PHP_VERSION=latest
 ARG PHP_INSTALL_TYPE=repo
 
+# Full version number
+ARG PHP_VERSION=8.1.4

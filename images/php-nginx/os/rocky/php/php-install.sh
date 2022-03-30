@@ -11,6 +11,12 @@ trigger_error() {
 version="${1-}"
 test -n "$version" || trigger_error "ERROR: build-arg PHP_VERSION not provided"
 
+# configure dnf to use powertools and epel repos
+dnf install -y dnf-plugins-core
+dnf install -y epel-release
+dnf config-manager --set-enabled powertools
+dnf update -y
+
 #install jq for easy json parsing
 dnf install -y jq curl
 
@@ -37,18 +43,20 @@ dnf install -y make \
                autoconf \
                libtool \
                bison \
-               re2c \
-               automake
+               automake \
+               re2c
 
-
-# PHP-FPM requires zlib1g-dev for --enable-fpm
 # Laravel requires the following dev libaries
 # libopenssl-dev / --with-openssl
 # oniguruma-devel / --enable-mbstring
-dnf install -y libopenssl-dev \
+# zlib-devel / --with-zlib
+# libxml2-devel
+# sqlite-devel
+dnf install -y openssl-devel \
+               zlib-devel \
+               libxml2-devel \
                oniguruma-devel \
-               lzip \
-               libxml2-devel
+               sqlite-devel
 
 # Symfony does not require additional dev libraries
 
@@ -85,7 +93,6 @@ echo "tarball unpacked to $php_compile_dir"
 
 cd $php_compile_dir
 
-useradd -r phpd
 mkdir /etc/php
 mkdir /etc/php/php.d
 
@@ -101,7 +108,8 @@ mkdir /etc/php/php.d
             --with-openssl \
             --with-pdo-mysql=mysqlnd \
             --with-zlib \
-            --enable-opcache
+            --enable-opcache \
+            --enable-pcntl
 
 cores=$(nproc)
 make -j${cores}
@@ -123,10 +131,13 @@ mv /etc/php/php-fpm.d/www.conf.default /etc/php/php-fpm.d/www.conf
 
 rm -r ${tmp_install_dir}
 
-apt-get autoremove -y --purge autoconf \
-                              bison \
-                              build-essential \
-                              pkg-config \
-                              re2c \
-                              jq \
-                              curl
+dnf remove -y  make \
+               gcc \
+               gcc-c++ \
+               binutils \
+               glibc-devel \
+               autoconf \
+               libtool \
+               bison \
+               automake \
+               re2c

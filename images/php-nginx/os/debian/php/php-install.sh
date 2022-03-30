@@ -42,6 +42,7 @@ apt-get install -y --no-install-recommends autoconf \
 # Laravel requires the following dev libaries
 # libssl-dev / --with-openssl
 # libonig-dev / --enable-mbstring
+# zlib1-dev / --with-zlib
 apt-get install -y --no-install-recommends libssl-dev \
                                            libonig-dev \
                                            zlib1g-dev
@@ -97,7 +98,8 @@ mkdir /etc/php/php.d
             --with-openssl \
             --with-pdo-mysql=mysqlnd \
             --with-zlib \
-            --enable-opcache
+            --enable-opcache \
+            --enable-pcntl
 
 cores=$(nproc)
 make -j${cores}
