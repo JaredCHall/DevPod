@@ -25,7 +25,9 @@ install_from_repo()
     trigger_warning "PHP_VERSION ignored. Only the latest stable can be installed from the Rocky Linux repository."
     dnf install -y php \
                    php-cli \
-                   php-fpm
+                   php-fpm \
+                   php-json \
+                   php-opcache
 }
 
 compile_from_source()

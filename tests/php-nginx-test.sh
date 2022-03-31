@@ -55,15 +55,10 @@ run_tests() {
     podunit_msg "PHP extensions: ${php_extensions}"
 
     # Test installed php version
-    case ${PODMAN_PHPNGINX_OS} in
-        alpine)
-            podunit_skip "PHP version"
+    case ${PODMAN_PHP_INSTALL_TYPE} in
+        repo) podunit_skip "PHP version"
         ;;
-        debian)
-            podunit_assert "PHP version" test "${PODMAN_PHP_VERSION}" = "${php_version}"
-        ;;
-        rocky)
-            podunit_assert "PHP version" test "${PODMAN_PHP_VERSION}" = "${php_version}"
+        source) podunit_assert "PHP version" test "${PODMAN_PHP_VERSION}" = "${php_version}"
         ;;
     esac
 
@@ -84,7 +79,7 @@ run_tests() {
     podunit_assert "nginx serves php" test "${r}" = 'ok'
 
     # Test php composer installed
-    if [[ "1" = "${PODMAN_COMPOSE}" ]]; then
+    if [[ "1" = "${PODMAN_PHP_COMPOSER}" ]]; then
         podunit_assert "php composer installed" test -n "${composer_version}"
     else
         podunit_skip "php composer installed"

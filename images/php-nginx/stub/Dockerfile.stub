@@ -17,10 +17,10 @@ ADD php/etc php-etc
 RUN ./php-configure.sh "${PHP_INSTALL_TYPE}" "${PHP_VERSION}"
 
 # Install composer
-ARG COMPOSER=1
+ARG PHP_COMPOSER=1
 ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY php/php-composer-install.sh ./
-RUN ./php-composer-install.sh ${COMPOSER}
+RUN ./php-composer-install.sh ${PHP_COMPOSER}
 
 # Configure nginx
 COPY nginx/nginx-configure.sh ./
