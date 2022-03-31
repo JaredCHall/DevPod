@@ -9,5 +9,8 @@ RUN apt-get install -y --no-install-recommends tzdata
 # Install ca-certificates
 RUN apt-get install -y --no-install-recommends ca-certificates
 
-# Full version number
-ARG PHP_VERSION=8.1.4
+ARG NGINX_INSTALL_TYPE=repo
+ARG NGINX_VERSION=''
+
+ARG PHP_INSTALL_TYPE=repo
+ARG PHP_VERSION=''
