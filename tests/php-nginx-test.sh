@@ -78,6 +78,14 @@ run_tests() {
     r="${r//[$'\r\n']/}"
     podunit_assert "nginx serves php" test "${r}" = 'ok'
 
+    # Test installed nginx version
+    case ${PODMAN_NGINX_INSTALL_TYPE} in
+        repo) podunit_skip "Nginx version"
+        ;;
+        source) podunit_assert "Nginx version" test "${PODMAN_NGINX_VERSION}" = "${nginx_version}"
+        ;;
+    esac
+
     # Test php composer installed
     if [[ "1" = "${PODMAN_PHP_COMPOSER}" ]]; then
         podunit_assert "php composer installed" test -n "${composer_version}"
