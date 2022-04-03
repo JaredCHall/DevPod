@@ -25,4 +25,4 @@ mv composer.phar /usr/local/bin/composer
 rm composer-setup.php
 
 # sanity check
-composer --version | grep -qE "^Composer [0-9]+[.][0-9]+[.][0-9]+" || trigger_error "sanity check! composer installation failed"
+composer --version | grep -qE "^Composer version [0-9]+[.][0-9]+[.][0-9]+" || trigger_error "sanity check! composer installation failed"
