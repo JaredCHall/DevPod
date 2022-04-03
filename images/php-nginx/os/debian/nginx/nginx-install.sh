@@ -48,16 +48,27 @@ compile_from_source()
 
     # Minimal dependencies
     apt-get install -y  --no-install-recommends make \
-                                                gcc
+                                                gcc \
+                                                g++
 
-    # shared libraries
-    apt-get install -y  --no-install-recommends zlib1g-dev \
-                                                libpcre3-dev
 
+
+    # create a temp installation dir we can easily delete later
     tmp_install_dir="/tmp/nginx.install"
     mkdir $tmp_install_dir
     cd $tmp_install_dir
 
+    # download/unpack pcre source files
+    curl -sL https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.gz/download > pcre.tar.gz
+    mkdir pcre
+    tar -xzf pcre.tar.gz --strip-components=1 --directory pcre
+
+    # download/unpack zlib source files
+    curl -sL https://zlib.net/zlib-1.2.12.tar.gz > zlib.tar.gz
+    mkdir zlib
+    tar -xzf zlib.tar.gz --strip-components=1 --directory zlib
+
+    # Install nginx
     echo "downloading NGINX version $version from nginx.com"
     curl -sL "https://nginx.org/download/nginx-${version}.tar.gz" > nginx.tar.gz
 
@@ -74,7 +85,8 @@ compile_from_source()
                 --user=nginx \
                 --group=nginx \
                 --with-threads \
-                --with-pcre \
+                --with-pcre=${tmp_install_dir}/pcre \
+                --with-zlib=${tmp_install_dir}/zlib \
                 --without-http_uwsgi_module \
                 --without-http_autoindex_module \
                 --without-http_scgi_module
@@ -89,7 +101,7 @@ compile_from_source()
     # Remove Dependencies
     apt-get remove -y   make \
                         gcc \
-                        curl
+                        g++
 
 }
 

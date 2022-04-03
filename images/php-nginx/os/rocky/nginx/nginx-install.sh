@@ -40,26 +40,30 @@ compile_from_source()
     test -n "${version}" || trigger_error "ERROR: build-arg NGINX_VERSION not provided"
     echo "${version}" | grep -qE "^[0-9]+[.][0-9]+[.][0-9+]$" || trigger_error "Invalid NGINX version '${version}'. Must be a full version number such as 1.20.2"
 
-    # configure dnf to use powertools and epel repos
-    dnf install -y dnf-plugins-core
-    dnf install -y epel-release
-    dnf config-manager --set-enabled powertools
-    dnf update -y
-
     #install curl to download source
     dnf install -y curl
 
     # Minimal dependencies
     dnf install -y make \
-                   gcc
+                   gcc \
+                   gcc-c++
 
-    dnf install -y zlib-devel \
-                   pcre-devel
-
+    # create a temp installation dir we can easily delete later
     tmp_install_dir="/tmp/nginx.install"
     mkdir $tmp_install_dir
     cd $tmp_install_dir
 
+    # download/unpack pcre source files
+    curl -sL https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.gz/download > pcre.tar.gz
+    mkdir pcre
+    tar -xzf pcre.tar.gz --strip-components=1 --directory pcre
+
+    # download/unpack zlib source files
+    curl -sL https://zlib.net/zlib-1.2.12.tar.gz > zlib.tar.gz
+    mkdir zlib
+    tar -xzf zlib.tar.gz --strip-components=1 --directory zlib
+
+    # Install nginx
     echo "downloading NGINX version $version from nginx.com"
     curl -sL "https://nginx.org/download/nginx-${version}.tar.gz" > nginx.tar.gz
 
@@ -76,7 +80,8 @@ compile_from_source()
                 --user=nginx \
                 --group=nginx \
                 --with-threads \
-                --with-pcre \
+                --with-pcre=${tmp_install_dir}/pcre \
+                --with-zlib=${tmp_install_dir}/zlib \
                 --without-http_uwsgi_module \
                 --without-http_autoindex_module \
                 --without-http_scgi_module
@@ -90,7 +95,8 @@ compile_from_source()
 
     # Minimal dependencies
     dnf remove -y   make \
-                    gcc
+                    gcc \
+                    gcc-c++
 
 }
 
