@@ -2,10 +2,6 @@
 set -euo pipefail
 
 trigger_error() { echo "[ERROR] $1" >&2; exit 1; }
-trigger_warning() { echo "[WARNING] $1" >&2; }
-
-# Exit 0, if image not configured to install composer
-[[ '1' != "${1-}" ]] && exit 0
 
 #https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
 EXPECTED_CHECKSUM="$(php -r 'copy("https://composer.github.io/installer.sig", "php://stdout");')"

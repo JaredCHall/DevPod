@@ -7,11 +7,8 @@ source ./src/podunit.sh
 main() {
 
     require_env_file ../.php-nginx.env PODMAN_PHPNGINX_OS \
-                                       PODMAN_NGINX_INSTALL_TYPE \
                                        PODMAN_NGINX_VERSION \
-                                       PODMAN_PHP_INSTALL_TYPE \
                                        PODMAN_PHP_VERSION \
-                                       PODMAN_PHP_COMPOSER
 
     check_dependencies "podman" "wget"
 
@@ -22,18 +19,13 @@ main() {
     podunit_container_port="80"
 
     # add build args
-    podunit_build_args+=("NGINX_INSTALL_TYPE=${PODMAN_NGINX_INSTALL_TYPE}")
     podunit_build_args+=("NGINX_VERSION=${PODMAN_NGINX_VERSION}")
-    podunit_build_args+=("PHP_INSTALL_TYPE=${PODMAN_PHP_INSTALL_TYPE}")
     podunit_build_args+=("PHP_VERSION=${PODMAN_PHP_VERSION}")
-    podunit_build_args+=("PHP_COMPOSER=${PODMAN_PHP_COMPOSER}")
 
     # set volumes
     podunit_volumes+=("${podunit_tmp_dir}/project:/var/www/public:Z")
     podunit_volumes+=("${podunit_tmp_dir}/nginx-etc:/container/etc/nginx:Z")
     podunit_volumes+=("${podunit_tmp_dir}/php-etc:/container/etc/php:Z")
-    podunit_volumes+=("${podunit_tmp_dir}/nginx-defaults:/container/etc/nginx.defaults:Z")
-    podunit_volumes+=("${podunit_tmp_dir}/php-defaults:/container/etc/php.defaults:Z")
 
     # define exposed ports
 
@@ -127,14 +119,6 @@ run_tests() {
 
     # Test php conf exposed to host
     podunit_assert "php conf exposed to host" test -f ${podunit_tmp_dir}/php-etc/php-fpm.conf
-
-    # Test nginx conf defaults exposed to host
-    r=$(ls -1U ${podunit_tmp_dir}/nginx-defaults | wc -l)
-    podunit_assert "nginx default conf exposed to host" test "$r" -gt 0
-
-    # Test php conf defaults exposed to host
-    r=$(ls -1U ${podunit_tmp_dir}/php-defaults | wc -l)
-    podunit_assert "php default conf exposed to host" test "$r" -gt 0
 
 }
 
