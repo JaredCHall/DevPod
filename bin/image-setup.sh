@@ -85,18 +85,41 @@ install_build_context() {
     install_dir="${build_dir}/images/${image_type}"
     mkdir -p "${install_dir}"
 
-    # Copy shared resources
+    ### Copy shared resources ###
     if [ -d "${image_dir}/share" ]; then
-        cp -r "${image_dir}/share/"* "${install_dir}"
+
+        # Check for special sharing rules
+        if [ -f "${image_dir}/copy_shared_files.func.sh" ]; then
+            source "${image_dir}/copy_shared_files.func.sh" "${image_os}"
+        fi
+
+        if [[ $(type -t copy_shared_files) == 'function' ]]; then
+            # run special function if defined
+            copy_shared_files
+        else
+            # otherwise copy everything
+            cp -r "${image_dir}/share/"* "${install_dir}"
+        fi
+
     fi
 
-    # Copy os-specific resources
+    ### Copy os-specific resources (these overwrite shared files) ###
     cp -r "${src_dir}/"* "${install_dir}"
 
-    # Create Dockerfile
-    cat ${src_dir}/Dockerfile > "${install_dir}/Dockerfile"
-    if [ -f "${image_dir}/stub/Dockerfile.stub" ]; then
-        cat "${image_dir}/stub/Dockerfile.stub" >> "${install_dir}/Dockerfile"
+    ### Create Dockerfile ###
+
+    if [[ -f "${src_dir}/Dockerfile" ]]; then
+
+        # if regular file, copy it over
+        cat "${src_dir}/Dockerfile" > "${install_dir}/Dockerfile"
+
+    elif [[ -f "${src_dir}/base.dockerfile" ]]; then
+
+        # if it's a stub, then copy concatenate with the stub in share
+        cat "${src_dir}/base.dockerfile" > "${install_dir}/Dockerfile"
+        if [[ -f "${image_dir}/stub/Dockerfile" ]]; then
+            cat "${image_dir}/stub/Dockerfile" >> "${install_dir}/Dockerfile"
+        fi
     fi
 
     # Copy test src

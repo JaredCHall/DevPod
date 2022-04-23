@@ -51,15 +51,6 @@ expose_conf()
     ln -s /container/etc/php /etc/php
   fi
 
-  # Expose default configuration to host
-  if [ -d /container/etc/nginx.defaults ]; then
-    cp -r /container/defaults/nginx/* /container/etc/nginx.defaults
-  fi
-
-  if [ -d /container/etc/php.defaults ]; then
-    cp -r /container/defaults/php/* /container/etc/php.defaults
-  fi
-
 }
 
 main

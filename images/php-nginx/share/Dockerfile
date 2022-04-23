@@ -1,11 +1,3 @@
-FROM docker.io/library/rockylinux:8.5 as base
-
-# Always upgrade to get the latest security patches
-RUN dnf upgrade -y
-
-# Install tzdata to allow changing container timezone
-RUN dnf install -y tzdata
-
 ### NGINX ###
 FROM base as nginx
 
@@ -54,6 +46,8 @@ ADD php/etc /etc/php
 
 ### php-nginx ###
 FROM base as php-nginx
+
+# Copy php/nginx
 COPY --from=nginx /opt/nginx/ /opt/nginx/
 COPY --from=nginx /etc/nginx/ /etc/nginx/
 COPY --from=php /opt/php/ /opt/php/
@@ -75,10 +69,6 @@ RUN useradd -r -s /sbin/nologin nginx; \
     mkdir -p /var/www/public; \
     chown -R nginx:nginx /var/www;
 
-# The php-extensions are seemlingly impossible to compile statically, so install them again
-#COPY php/php-ext-deps.sh ./
-#RUN ./php-ext-deps.sh
-
 ### COMPOSER ###
 FROM php-nginx as with-composer
 
@@ -93,6 +83,3 @@ FROM with-composer as final
 WORKDIR /var/www/
 COPY start.sh /root/
 ENTRYPOINT [ "/root/start.sh" ]
-# Install somewhere easy to clean up
-RUN mkdir /tmp/build-image/
-WORKDIR /tmp/build-image/

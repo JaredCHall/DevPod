@@ -77,7 +77,7 @@ podunit_init() {
     # prepare containers
     podunit_msg "---- ${podunit_image_name}:${podunit_image_tag} ----"
     podunit_msg ""
-    container_up > /dev/null
+    container_up
 
     # Display container OS
     local os
@@ -357,23 +357,23 @@ container_down() {
 }
 
 container_stop() {
-    podunit_msg "stopping container..."
+    #podunit_msg "stopping container..."
     podman stop "${podunit_image_name}"
 }
 
 # $1 - keep volumes
 container_remove() {
-    podunit_msg "removing container..."
+    #podunit_msg "removing container..."
     podman rm -v "${podunit_image_name}" >/dev/null
 }
 
 container_start() {
-    podunit_msg "starting container..."
+    #podunit_msg "starting container..."
     podman start ${podunit_image_name} >/dev/null
 }
 
 container_create() {
-    podunit_msg "creating container..."
+    #podunit_msg "creating container..."
     local volume_args="$(get_volume_args_str)"
     podman create --name ${podunit_image_name} $(get_port_arg_str) ${volume_args} ${podunit_image_name}:${podunit_image_tag} >/dev/null
 }

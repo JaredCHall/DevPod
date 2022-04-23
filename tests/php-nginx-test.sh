@@ -47,12 +47,11 @@ run_tests() {
     podunit_msg "PHP extensions: ${php_extensions}"
 
     # Test installed php version
-    case ${PODMAN_PHP_INSTALL_TYPE} in
-        repo) podunit_skip "PHP version"
-        ;;
-        source) podunit_assert "PHP version" test "${PODMAN_PHP_VERSION}" = "${php_version}"
-        ;;
-    esac
+    if [[ ${PODMAN_PHPNGINX_OS} == 'alpine' ]]; then
+        podunit_skip "PHP version"
+    else
+        podunit_assert "PHP version" test "${PODMAN_PHP_VERSION}" = "${php_version}"
+    fi
 
     test_dir="${podunit_tmp_dir}/project/tmp-testing-dir"
     test_uri="localhost:${podunit_host_port}/tmp-testing-dir"
@@ -71,15 +70,14 @@ run_tests() {
     podunit_assert "nginx serves php" test "${r}" = 'ok'
 
     # Test installed nginx version
-    case ${PODMAN_NGINX_INSTALL_TYPE} in
-        repo) podunit_skip "Nginx version"
-        ;;
-        source) podunit_assert "Nginx version" test "${PODMAN_NGINX_VERSION}" = "${nginx_version}"
-        ;;
-    esac
+    if [[ ${PODMAN_NGINX_VERSION} == 'latest' ]]; then
+        podunit_skip "Nginx version"
+    else
+        podunit_assert "Nginx version" test "${PODMAN_NGINX_VERSION}" = "${nginx_version}"
+    fi
 
     # Test php composer installed
-    if [[ "1" = "${PODMAN_PHP_COMPOSER}" ]]; then
+    if [[ ${PODMAN_PHPNGINX_OS} == 'alpine' ]]; then
         podunit_assert "php composer installed" test -n "${composer_version}"
     else
         podunit_skip "php composer installed"
