@@ -32,8 +32,8 @@ RUN ./php-configure.sh "${PHP_VERSION}"
 # Install composer
 ARG PHP_COMPOSER=1
 ENV COMPOSER_ALLOW_SUPERUSER=1
-COPY php/php-composer-install.sh ./
-RUN ./php-composer-install.sh ${PHP_COMPOSER}
+COPY php/php-composer.sh ./
+RUN ./php-composer.sh ${PHP_COMPOSER}
 
 # Configure nginx
 COPY nginx/nginx-configure.sh ./

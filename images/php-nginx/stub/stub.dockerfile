@@ -38,7 +38,7 @@ COPY php/php-compile.sh ./
 RUN ./php-compile.sh
 
 COPY php/php-shared-objects.sh ./
-RUN ./php-shared-objects.sh
+RUN ./php-shared-objects.sh "BACKUP"
 
 ADD php/etc /etc/php
 
@@ -54,7 +54,9 @@ COPY --from=php /opt/php/ /opt/php/
 COPY --from=php /etc/php/ /etc/php/
 
 # Copy shared libraries php depends on
-COPY --from=php /root/php-lib/ /lib64/
+COPY --from=php /root/php-lib/ /root/php-lib/
+COPY php/php-shared-objects.sh ./
+RUN ./php-shared-objects.sh "RESTORE"
 
 # Create sym links
 RUN ln -s /opt/php/bin/php /usr/bin/php; \
@@ -76,7 +78,7 @@ WORKDIR /tmp/
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY php/php-composer.sh ./
-RUN ./php-composer.sh ${PHP_COMPOSER}
+RUN ./php-composer.sh
 
 FROM with-composer as final
 

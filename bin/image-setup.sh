@@ -111,15 +111,17 @@ install_build_context() {
     if [[ -f "${src_dir}/Dockerfile" ]]; then
 
         # if regular file, copy it over
-        cat "${src_dir}/Dockerfile" > "${install_dir}/Dockerfile"
+        cp "${src_dir}/Dockerfile" "${install_dir}/Dockerfile"
 
     elif [[ -f "${src_dir}/base.dockerfile" ]]; then
 
         # if it's a stub, then copy concatenate with the stub in share
         cat "${src_dir}/base.dockerfile" > "${install_dir}/Dockerfile"
-        if [[ -f "${image_dir}/stub/Dockerfile" ]]; then
-            cat "${image_dir}/stub/Dockerfile" >> "${install_dir}/Dockerfile"
-        fi
+        cat "${image_dir}/stub/stub.dockerfile" >> "${install_dir}/Dockerfile"
+
+        [[ ! -f "${image_dir}/stub/stub.dockerfile" ]] && trigger_error "File does not exist: stub.dockerfile"
+        rm "${install_dir}/base.dockerfile"
+
     fi
 
     # Copy test src
