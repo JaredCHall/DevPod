@@ -1,0 +1,17 @@
+services:
+  VAR_SERVICE_NAME:
+    image: VAR_IMAGE_NAME:1.0
+    build:
+      context: ./images/nodejs
+      args:
+        NODE_VERSION: "${PODMAN_NODE_VERSION}"
+    container_name: VAR_SERVICE_NAME
+    environment:
+      TZ: "${PODMAN_TIMEZONE}"
+    networks:
+      - VAR_NETWORK_NAME
+    ports:
+      - 127.0.0.1:8080:5000
+    volumes:
+      # expose www files to host
+      - ./:/var/www/:Z
