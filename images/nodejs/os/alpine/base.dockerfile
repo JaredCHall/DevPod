@@ -1,4 +1,4 @@
-FROM docker.io/library/alpine:3.16
+FROM docker.io/library/alpine:3
 
 # Always upgrade to get the latest security patches
 RUN apk update && apk upgrade

@@ -168,7 +168,7 @@ create_compose_example() {
     replace+=("s/VAR_IMAGE_NAME/${image_type}/g")
 
     case "${image_type}" in
-        php-nginx) service="web" ;;
+        php-nginx | nodejs) service="web" ;;
         mysql | mariadb) service="data" ;;
     esac
     replace+=("s/VAR_SERVICE_NAME/${dirname}-${service}/g")
